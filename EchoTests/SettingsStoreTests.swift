@@ -1,5 +1,5 @@
 import XCTest
-@testable import EchoFS
+@testable import Echo
 
 final class SettingsStoreTests: XCTestCase {
 
@@ -23,11 +23,6 @@ final class SettingsStoreTests: XCTestCase {
     func testDefaultMaxRecordingDuration() {
         let store = SettingsStore()
         XCTAssertEqual(store.maxRecordingDuration, 120)
-    }
-
-    func testDefaultPrivacyMode() {
-        let store = SettingsStore()
-        XCTAssertFalse(store.privacyModeEnabled)
     }
 
     // MARK: - App Rule Helpers

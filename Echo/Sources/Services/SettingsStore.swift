@@ -3,7 +3,7 @@ import os.log
 
 /// Persists user settings via UserDefaults.
 final class SettingsStore: ObservableObject {
-    private static let logger = Logger(subsystem: "com.echo-fs", category: "SettingsStore")
+    private static let logger = Logger(subsystem: "com.echo", category: "SettingsStore")
     private let defaults = UserDefaults.standard
 
     // MARK: - Keys
@@ -13,7 +13,7 @@ final class SettingsStore: ObservableObject {
         static let recordMode = "recordMode"
         static let selectedModelID = "selectedModelID"
         static let processingSettings = "processingSettings"
-        static let privacyModeEnabled = "privacyModeEnabled"
+
         static let launchAtLogin = "launchAtLogin"
         static let maxRecordingDuration = "maxRecordingDuration"
         static let hasCompletedOnboarding = "hasCompletedOnboarding"
@@ -26,7 +26,7 @@ final class SettingsStore: ObservableObject {
     @Published var recordMode: RecordMode = .hold
     @Published var selectedModelID: String = "whisper-small.en"
     @Published var processingSettings: ProcessingSettings = ProcessingSettings()
-    @Published var privacyModeEnabled: Bool = false
+
     @Published var launchAtLogin: Bool = false
     @Published var maxRecordingDuration: TimeInterval = 120
     @Published var hasCompletedOnboarding: Bool = false
@@ -54,7 +54,6 @@ final class SettingsStore: ObservableObject {
             processingSettings = settings
         }
 
-        privacyModeEnabled = defaults.bool(forKey: Keys.privacyModeEnabled)
         launchAtLogin = defaults.bool(forKey: Keys.launchAtLogin)
         hasCompletedOnboarding = defaults.bool(forKey: Keys.hasCompletedOnboarding)
 
@@ -78,7 +77,6 @@ final class SettingsStore: ObservableObject {
         if let data = try? JSONEncoder().encode(processingSettings) {
             defaults.set(data, forKey: Keys.processingSettings)
         }
-        defaults.set(privacyModeEnabled, forKey: Keys.privacyModeEnabled)
         defaults.set(launchAtLogin, forKey: Keys.launchAtLogin)
         defaults.set(maxRecordingDuration, forKey: Keys.maxRecordingDuration)
         defaults.set(hasCompletedOnboarding, forKey: Keys.hasCompletedOnboarding)

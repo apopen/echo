@@ -24,7 +24,7 @@ final class WindowManager {
             backing: .buffered,
             defer: false
         )
-        window.title = "echo-fs Settings"
+        window.title = "Echo Settings"
         window.contentView = NSHostingView(rootView: view)
         window.center()
         window.isReleasedWhenClosed = false
@@ -51,7 +51,7 @@ final class WindowManager {
             backing: .buffered,
             defer: false
         )
-        window.title = "echo-fs Setup"
+        window.title = "Echo Setup"
         window.contentView = NSHostingView(rootView: view)
         window.center()
         window.isReleasedWhenClosed = false

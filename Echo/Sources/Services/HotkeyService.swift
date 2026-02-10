@@ -3,7 +3,7 @@ import os.log
 
 /// Monitors a global keyboard hotkey for recording activation.
 final class HotkeyService {
-    private static let logger = Logger(subsystem: "com.echo-fs", category: "HotkeyService")
+    private static let logger = Logger(subsystem: "com.echo", category: "HotkeyService")
 
     var onKeyDown: (() -> Void)?
     var onKeyUp: (() -> Void)?
@@ -28,7 +28,7 @@ final class HotkeyService {
                 Self.logger.error("CGEvent tap failed — need Accessibility/Input Monitoring permission")
             }
         }
-        thread.name = "com.echo-fs.event-tap"
+        thread.name = "com.echo.event-tap"
         thread.qualityOfService = .userInteractive
         thread.start()
         tapThread = thread

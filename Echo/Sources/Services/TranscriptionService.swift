@@ -5,10 +5,10 @@ import os.log
 /// Wraps WhisperCppKit for on-device speech-to-text inference.
 /// All inference runs on a dedicated background queue to keep the main thread responsive.
 final class TranscriptionService {
-    private static let logger = Logger(subsystem: "com.echo-fs", category: "TranscriptionService")
+    private static let logger = Logger(subsystem: "com.echo", category: "TranscriptionService")
 
     /// Dedicated serial queue for whisper.cpp inference (CPU/GPU intensive).
-    private let inferenceQueue = DispatchQueue(label: "com.echo-fs.inference", qos: .userInitiated)
+    private let inferenceQueue = DispatchQueue(label: "com.echo.inference", qos: .userInitiated)
 
     private var whisperContext: WhisperContext?
     private var isCancelled = false

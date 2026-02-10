@@ -6,12 +6,11 @@ import os.log
 /// Central application state coordinating all services and the dictation pipeline.
 @MainActor
 final class AppState: ObservableObject {
-    private static let logger = Logger(subsystem: "com.echo-fs", category: "AppState")
+    private static let logger = Logger(subsystem: "com.echo", category: "AppState")
 
     // MARK: - Published State
 
     @Published var recordingState: RecordingState = .idle
-    @Published var privacyMode: Bool = false
     @Published var isModelLoaded: Bool = false
     @Published var hasCompletedOnboarding: Bool = false
     @Published var audioLevel: Float = 0.0
@@ -25,8 +24,6 @@ final class AppState: ObservableObject {
     let transcriptionService = TranscriptionService()
     let insertionService = InsertionService()
     let processingPipeline = ProcessingPipeline()
-    let historyStore = HistoryStore()
-    let privacyService = PrivacyService()
     let modelManager = ModelManager()
 
     private var cancellables = Set<AnyCancellable>()
@@ -36,8 +33,6 @@ final class AppState: ObservableObject {
     func initialize() {
         settingsStore.load()
         hasCompletedOnboarding = settingsStore.hasCompletedOnboarding
-        privacyMode = settingsStore.privacyModeEnabled
-        privacyService.isPrivacyModeEnabled = privacyMode
 
         setupHotkeyBindings()
         setupAudioLevelMonitor()
@@ -53,15 +48,10 @@ final class AppState: ObservableObject {
     }
 
     func handleWake() {
-        // Re-validate permissions and audio session after wake
         permissionService.refreshStatus()
-        if recordingState == .idle && isModelLoaded {
-            // Ready to use — no action needed
-        }
     }
 
     func handleSleep() {
-        // If recording, cancel gracefully
         if recordingState == .recording {
             cancelRecording()
         }
@@ -81,7 +71,6 @@ final class AppState: ObservableObject {
             return
         }
 
-        // Check mic permission — request if not yet determined
         permissionService.refreshStatus()
         guard permissionService.microphoneGranted else {
             Self.logger.warning("Cannot start recording: microphone not granted")
@@ -157,7 +146,7 @@ final class AppState: ObservableObject {
                 )
 
                 recordingState = .inserting
-                await insertText(processedText, raw: rawText)
+                await insertText(processedText)
             } catch {
                 Self.logger.error("Transcription failed: \(error)")
                 recordingState = .error(.transcriptionFailed(error.localizedDescription))
@@ -166,7 +155,7 @@ final class AppState: ObservableObject {
         }
     }
 
-    private func insertText(_ text: String, raw: String) async {
+    private func insertText(_ text: String) async {
         let bundleID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
         let autoSend = settingsStore.shouldAutoSend(forBundleID: bundleID)
 
@@ -174,21 +163,7 @@ final class AppState: ObservableObject {
             try await insertionService.insert(text, autoSend: autoSend)
             Self.logger.info("Text copied to clipboard: '\(text)'")
         } catch {
-            // Insertion failed — text is already on clipboard as final fallback
-        }
-
-        // Persist to history if not in privacy mode
-        if !privacyService.isPrivacyModeEnabled {
-            let item = TranscriptItem(
-                id: UUID(),
-                createdAt: Date(),
-                textRaw: raw,
-                textProcessed: text,
-                sourceAppBundleID: bundleID,
-                modelID: settingsStore.selectedModelID,
-                latencyMs: 0 // TODO: measure actual latency
-            )
-            historyStore.save(item)
+            Self.logger.error("Insertion failed: \(error)")
         }
 
         recordingState = .idle
@@ -204,7 +179,7 @@ final class AppState: ObservableObject {
 
     private func scheduleErrorReset() {
         Task {
-            try? await Task.sleep(nanoseconds: 3_000_000_000) // 3 seconds
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
             if case .error = recordingState {
                 recordingState = .idle
             }
@@ -249,7 +224,7 @@ final class AppState: ObservableObject {
                 stopRecording()
             }
         case .toggle:
-            break // Toggle mode ignores key-up
+            break
         }
     }
 
@@ -278,20 +253,6 @@ final class AppState: ObservableObject {
     }
 
     // MARK: - Public Actions
-
-    func togglePrivacyMode() {
-        privacyMode.toggle()
-        privacyService.isPrivacyModeEnabled = privacyMode
-        settingsStore.privacyModeEnabled = privacyMode
-
-        if privacyMode {
-            historyStore.clearAll()
-        }
-    }
-
-    func clearHistory() {
-        historyStore.clearAll()
-    }
 
     func completeOnboarding() {
         hasCompletedOnboarding = true

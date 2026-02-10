@@ -3,7 +3,7 @@ import os.log
 
 /// Captures microphone audio via AVAudioEngine, resampling to 16kHz mono Float32.
 final class RecordingService {
-    private static let logger = Logger(subsystem: "com.echo-fs", category: "RecordingService")
+    private static let logger = Logger(subsystem: "com.echo", category: "RecordingService")
 
     /// Target format required by whisper.cpp: 16kHz mono Float32
     static let targetSampleRate: Double = 16000.0

@@ -86,17 +86,7 @@ struct GeneralSettingsView: View {
                 }
             }
 
-            Section("Privacy") {
-                Toggle("Privacy Mode", isOn: Binding(
-                    get: { appState.privacyMode },
-                    set: { _ in appState.togglePrivacyMode() }
-                ))
-                Text("When enabled, clears history and blocks future writes.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            Section("System") {
+Section("System") {
                 Toggle("Launch at Login", isOn: Binding(
                     get: { appState.settingsStore.launchAtLogin },
                     set: {

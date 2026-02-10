@@ -56,6 +56,7 @@ struct FloatingBarView: View {
             .opacity(isTranscribing ? 1 : 0)
         }
         .frame(width: pillWidth, height: pillHeight)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear { startTimer() }
         .onDisappear { timer?.invalidate() }
         .onChange(of: appState.recordingState) { newState in

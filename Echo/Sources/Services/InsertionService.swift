@@ -3,7 +3,7 @@ import os.log
 
 /// Copies transcribed text to the system clipboard.
 final class InsertionService {
-    private static let logger = Logger(subsystem: "com.echo-fs", category: "InsertionService")
+    private static let logger = Logger(subsystem: "com.echo", category: "InsertionService")
 
     /// Copy text to the clipboard.
     func insert(_ text: String, autoSend: Bool) async throws {

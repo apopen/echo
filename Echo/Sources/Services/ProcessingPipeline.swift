@@ -7,7 +7,7 @@ import os.log
 /// 3. Custom replacements
 /// 4. Punctuation/capitalization formatting
 final class ProcessingPipeline {
-    private static let logger = Logger(subsystem: "com.echo-fs", category: "ProcessingPipeline")
+    private static let logger = Logger(subsystem: "com.echo", category: "ProcessingPipeline")
 
     /// Default filler words to remove.
     static let defaultFillerWords: Set<String> = [

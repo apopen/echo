@@ -5,7 +5,7 @@ import os.log
 /// Manages microphone and accessibility permission checks with remediation guidance.
 @MainActor
 final class PermissionService: ObservableObject {
-    private static let logger = Logger(subsystem: "com.echo-fs", category: "PermissionService")
+    private static let logger = Logger(subsystem: "com.echo", category: "PermissionService")
 
     @Published var microphoneGranted: Bool = false
     @Published var accessibilityGranted: Bool = false

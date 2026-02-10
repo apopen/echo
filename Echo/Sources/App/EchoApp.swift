@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct EchoFSApp: App {
+struct EchoApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {

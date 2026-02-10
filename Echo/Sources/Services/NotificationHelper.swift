@@ -3,7 +3,7 @@ import os.log
 
 /// Sends local notifications for system events (max duration reached, errors, etc.).
 enum NotificationHelper {
-    private static let logger = Logger(subsystem: "com.echo-fs", category: "NotificationHelper")
+    private static let logger = Logger(subsystem: "com.echo", category: "NotificationHelper")
 
     static func requestPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in

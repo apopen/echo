@@ -2,27 +2,25 @@
 import PackageDescription
 
 let package = Package(
-    name: "EchoFS",
+    name: "Echo",
     platforms: [
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "EchoFS", targets: ["EchoFS"])
+        .executable(name: "Echo", targets: ["Echo"])
     ],
     dependencies: [
         .package(url: "https://github.com/Justmalhar/WhisperCppKit.git", from: "0.1.1"),
         .package(url: "https://github.com/soffes/HotKey.git", from: "0.2.1"),
-        .package(url: "https://github.com/groue/GRDB.swift.git", from: "6.29.0"),
     ],
     targets: [
         .executableTarget(
-            name: "EchoFS",
+            name: "Echo",
             dependencies: [
                 .product(name: "WhisperCppKit", package: "WhisperCppKit"),
                 "HotKey",
-                .product(name: "GRDB", package: "GRDB.swift"),
             ],
-            path: "EchoFS/Sources",
+            path: "Echo/Sources",
             resources: [
                 .process("../Resources"),
             ],
@@ -31,9 +29,9 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "EchoFSTests",
-            dependencies: ["EchoFS"],
-            path: "EchoFSTests"
+            name: "EchoTests",
+            dependencies: ["Echo"],
+            path: "EchoTests"
         ),
     ]
 )

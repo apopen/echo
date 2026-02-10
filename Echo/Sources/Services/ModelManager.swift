@@ -5,7 +5,7 @@ import os.log
 /// Manages whisper.cpp model downloads, verification, and storage.
 @MainActor
 final class ModelManager: ObservableObject {
-    private static let logger = Logger(subsystem: "com.echo-fs", category: "ModelManager")
+    private static let logger = Logger(subsystem: "com.echo", category: "ModelManager")
 
     @Published var downloadProgress: Double = 0
     @Published var isDownloading: Bool = false
@@ -17,7 +17,7 @@ final class ModelManager: ObservableObject {
     /// Base directory for model storage.
     var modelsDirectory: URL {
         let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        return appSupport.appendingPathComponent("echo-fs/Models", isDirectory: true)
+        return appSupport.appendingPathComponent("Echo/Models", isDirectory: true)
     }
 
     /// Get the full file path for a model.

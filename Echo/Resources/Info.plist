@@ -11,7 +11,7 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>echo-fs</string>
+    <string>Echo</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -23,7 +23,7 @@
     <key>LSUIElement</key>
     <true/>
     <key>NSMicrophoneUsageDescription</key>
-    <string>echo-fs needs microphone access to capture your voice for local speech-to-text transcription. Audio is never sent to any server.</string>
+    <string>Echo needs microphone access to capture your voice for local speech-to-text transcription. Audio is never sent to any server.</string>
     <key>NSMainStoryboardFile</key>
     <string></string>
 </dict>

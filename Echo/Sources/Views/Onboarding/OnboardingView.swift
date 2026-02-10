@@ -84,7 +84,7 @@ struct WelcomeStepView: View {
             Image(systemName: "mic.fill")
                 .font(.system(size: 48))
                 .foregroundColor(.accentColor)
-            Text("Welcome to echo-fs")
+            Text("Welcome to Echo")
                 .font(.title)
             Text("A privacy-first voice-to-text assistant for macOS.\nAll processing happens locally on your device.")
                 .multilineTextAlignment(.center)
@@ -257,7 +257,7 @@ struct CompleteStepView: View {
                 .foregroundColor(.green)
             Text("Setup Complete")
                 .font(.title)
-            Text("echo-fs is ready. Use your hotkey to start dictating in any app.\nThe menu bar icon shows your current status.")
+            Text("Echo is ready. Use your hotkey to start dictating in any app.\nThe menu bar icon shows your current status.")
                 .multilineTextAlignment(.center)
                 .foregroundColor(.secondary)
         }

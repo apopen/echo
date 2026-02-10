@@ -1,5 +1,5 @@
 import XCTest
-@testable import EchoFS
+@testable import Echo
 
 final class RecordingStateTests: XCTestCase {
 
