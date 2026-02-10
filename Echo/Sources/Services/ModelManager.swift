@@ -9,10 +9,10 @@ final class ModelManager: ObservableObject {
 
     @Published var downloadProgress: Double = 0
     @Published var isDownloading: Bool = false
+    @Published var downloadingModelID: String?
     @Published var downloadError: String?
 
     private let fileManager = FileManager.default
-    private var downloadDelegate: DownloadDelegate?
 
     /// Base directory for model storage.
     var modelsDirectory: URL {
@@ -37,11 +37,12 @@ final class ModelManager: ObservableObject {
         }
     }
 
-    /// Download a model from Hugging Face using URLSessionDownloadTask.
+    /// Download a model from Hugging Face using URLSession with bytes streaming.
     func downloadModel(_ manifest: ModelManifest) async throws {
         guard !isDownloading else { return }
 
         isDownloading = true
+        downloadingModelID = manifest.id
         downloadProgress = 0
         downloadError = nil
 
@@ -50,6 +51,7 @@ final class ModelManager: ObservableObject {
             try fileManager.createDirectory(at: modelsDirectory, withIntermediateDirectories: true)
         } catch {
             isDownloading = false
+            downloadingModelID = nil
             downloadError = "Failed to create models directory: \(error.localizedDescription)"
             throw error
         }
@@ -59,17 +61,19 @@ final class ModelManager: ObservableObject {
         Self.logger.info("Starting download: \(manifest.id) from \(manifest.downloadURL)")
 
         do {
-            let tempFileURL = try await downloadWithProgress(from: manifest.downloadURL)
+            let tempFileURL = try await downloadWithProgress(from: manifest.downloadURL, expectedSize: manifest.fileSizeBytes)
 
             // Verify checksum if available
             if !manifest.sha256Checksum.isEmpty {
                 Self.logger.info("Verifying checksum for \(manifest.id)...")
+                downloadProgress = 1.0
                 let checksum = try computeSHA256(fileURL: tempFileURL)
                 guard checksum == manifest.sha256Checksum else {
                     try? fileManager.removeItem(at: tempFileURL)
                     let error = ModelError.checksumMismatch(expected: manifest.sha256Checksum, actual: checksum)
                     downloadError = error.localizedDescription
                     isDownloading = false
+                    downloadingModelID = nil
                     throw error
                 }
                 Self.logger.info("Checksum verified for \(manifest.id)")
@@ -84,10 +88,12 @@ final class ModelManager: ObservableObject {
 
             downloadProgress = 1.0
             isDownloading = false
+            downloadingModelID = nil
         } catch {
             Self.logger.error("Download failed: \(error.localizedDescription)")
             downloadError = error.localizedDescription
             isDownloading = false
+            downloadingModelID = nil
             throw error
         }
     }
@@ -98,68 +104,62 @@ final class ModelManager: ObservableObject {
         if fileManager.fileExists(atPath: path) {
             try fileManager.removeItem(atPath: path)
             Self.logger.info("Deleted model: \(modelID)")
+            objectWillChange.send()
         }
     }
 
     // MARK: - Private
 
-    private func downloadWithProgress(from url: URL) async throws -> URL {
-        let delegate = DownloadDelegate()
-        self.downloadDelegate = delegate
+    private func downloadWithProgress(from url: URL, expectedSize: Int64) async throws -> URL {
+        let tempFileURL = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".bin")
 
-        // Observe progress on main actor
-        let progressTask = Task { @MainActor [weak self] in
-            while !Task.isCancelled {
-                if let self {
-                    self.downloadProgress = delegate.progress
+        let (bytes, response) = try await URLSession.shared.bytes(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
+            throw ModelError.downloadFailed("HTTP \(code)")
+        }
+
+        let totalSize = httpResponse.expectedContentLength > 0
+            ? httpResponse.expectedContentLength
+            : expectedSize
+
+        fileManager.createFile(atPath: tempFileURL.path, contents: nil)
+        let handle = try FileHandle(forWritingTo: tempFileURL)
+        defer { try? handle.close() }
+
+        var bytesReceived: Int64 = 0
+        var lastProgressUpdate = Date.distantPast
+        let bufferSize = 65_536 // 64KB buffer
+        var buffer = Data()
+        buffer.reserveCapacity(bufferSize)
+
+        for try await byte in bytes {
+            buffer.append(byte)
+
+            if buffer.count >= bufferSize {
+                handle.write(buffer)
+                bytesReceived += Int64(buffer.count)
+                buffer.removeAll(keepingCapacity: true)
+
+                let now = Date()
+                if now.timeIntervalSince(lastProgressUpdate) >= 0.2 {
+                    lastProgressUpdate = now
+                    let progress = totalSize > 0 ? Double(bytesReceived) / Double(totalSize) : 0
+                    self.downloadProgress = progress
                 }
-                try await Task.sleep(nanoseconds: 200_000_000) // 200ms
             }
         }
 
-        defer {
-            progressTask.cancel()
-            self.downloadDelegate = nil
+        // Flush remaining buffer
+        if !buffer.isEmpty {
+            handle.write(buffer)
+            bytesReceived += Int64(buffer.count)
         }
 
-        let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
-        defer { session.finishTasksAndInvalidate() }
-
-        return try await withCheckedThrowingContinuation { continuation in
-            let task = session.downloadTask(with: url) { tempURL, response, error in
-                if let error {
-                    continuation.resume(throwing: ModelError.downloadFailed(error.localizedDescription))
-                    return
-                }
-
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    continuation.resume(throwing: ModelError.downloadFailed("No HTTP response"))
-                    return
-                }
-
-                guard (200...299).contains(httpResponse.statusCode) else {
-                    continuation.resume(throwing: ModelError.downloadFailed("HTTP \(httpResponse.statusCode)"))
-                    return
-                }
-
-                guard let tempURL else {
-                    continuation.resume(throwing: ModelError.downloadFailed("No downloaded file"))
-                    return
-                }
-
-                // Move to a stable temp location before the completion handler returns
-                // (the system deletes the file after this callback)
-                let stableTempURL = FileManager.default.temporaryDirectory
-                    .appendingPathComponent(UUID().uuidString + ".bin")
-                do {
-                    try FileManager.default.moveItem(at: tempURL, to: stableTempURL)
-                    continuation.resume(returning: stableTempURL)
-                } catch {
-                    continuation.resume(throwing: ModelError.downloadFailed("Failed to save temp file: \(error.localizedDescription)"))
-                }
-            }
-            task.resume()
-        }
+        self.downloadProgress = 1.0
+        return tempFileURL
     }
 
     private func computeSHA256(fileURL: URL) throws -> String {
@@ -178,25 +178,6 @@ final class ModelManager: ObservableObject {
 
         let digest = hasher.finalize()
         return digest.map { String(format: "%02x", $0) }.joined()
-    }
-}
-
-// MARK: - Download Delegate
-
-private final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
-    var progress: Double = 0
-
-    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
-                    didWriteData bytesWritten: Int64, totalBytesWritten: Int64,
-                    totalBytesExpectedToWrite: Int64) {
-        if totalBytesExpectedToWrite > 0 {
-            progress = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
-        }
-    }
-
-    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
-                    didFinishDownloadingTo location: URL) {
-        // Handled in the completion handler of downloadTask
     }
 }
 

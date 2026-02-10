@@ -183,11 +183,24 @@ struct ModelDownloadStepView: View {
                     }
                     Spacer()
                     if appState.modelManager.isModelDownloaded(manifest.id) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                    } else if appState.modelManager.isDownloading {
-                        ProgressView(value: appState.modelManager.downloadProgress)
-                            .frame(width: 100)
+                        HStack(spacing: 8) {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                            Button(role: .destructive) {
+                                try? appState.modelManager.deleteModel(manifest.id)
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    } else if appState.modelManager.downloadingModelID == manifest.id {
+                        VStack(spacing: 2) {
+                            ProgressView(value: appState.modelManager.downloadProgress)
+                                .frame(width: 100)
+                            Text("\(Int(appState.modelManager.downloadProgress * 100))%")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
                     } else {
                         Button("Download") {
                             appState.settingsStore.selectedModelID = manifest.id

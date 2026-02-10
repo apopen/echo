@@ -133,11 +133,24 @@ struct ModelSettingsView: View {
                         }
                         Spacer()
                         if entry.downloaded {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.green)
-                        } else if appState.modelManager.isDownloading {
-                            ProgressView(value: appState.modelManager.downloadProgress)
-                                .frame(width: 80)
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                Button(role: .destructive) {
+                                    try? appState.modelManager.deleteModel(entry.manifest.id)
+                                } label: {
+                                    Image(systemName: "trash")
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        } else if appState.modelManager.downloadingModelID == entry.manifest.id {
+                            VStack(spacing: 2) {
+                                ProgressView(value: appState.modelManager.downloadProgress)
+                                    .frame(width: 80)
+                                Text("\(Int(appState.modelManager.downloadProgress * 100))%")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
                         } else {
                             Button("Download") {
                                 Task {

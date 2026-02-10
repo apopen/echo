@@ -34,6 +34,16 @@ final class AppState: ObservableObject {
         settingsStore.load()
         hasCompletedOnboarding = settingsStore.hasCompletedOnboarding
 
+        // Forward nested ObservableObject changes so SwiftUI views update
+        modelManager.objectWillChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+        permissionService.objectWillChange
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &cancellables)
+
         setupHotkeyBindings()
         setupAudioLevelMonitor()
 
