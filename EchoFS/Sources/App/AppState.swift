@@ -195,13 +195,7 @@ final class AppState: ObservableObject {
     }
 
     private func setupAudioLevelMonitor() {
-        var logCounter = 0
         recordingService.onAudioLevel = { [weak self] level in
-            // Log first few levels to verify data flow
-            logCounter += 1
-            if logCounter <= 5 || logCounter % 100 == 0 {
-                fputs("[echo-fs] audioLevel=\(String(format: "%.3f", level)) (sample #\(logCounter))\n", stderr)
-            }
             DispatchQueue.main.async {
                 self?.audioLevel = level
             }

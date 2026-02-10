@@ -22,18 +22,16 @@ final class HotkeyService {
         let thread = Thread { [weak self] in
             guard let self else { return }
             if self.setupEventTap() {
-                fputs("[echo-fs] Hotkey registered via CGEvent tap: keyCode=\(combo.keyCode) (\(combo.displayString))\n", stderr)
+                Self.logger.info("Hotkey registered via CGEvent tap: keyCode=\(combo.keyCode) (\(combo.displayString))")
                 CFRunLoopRun()
             } else {
-                fputs("[echo-fs] CGEvent tap failed — need Accessibility/Input Monitoring permission\n", stderr)
+                Self.logger.error("CGEvent tap failed — need Accessibility/Input Monitoring permission")
             }
         }
         thread.name = "com.echo-fs.event-tap"
         thread.qualityOfService = .userInteractive
         thread.start()
         tapThread = thread
-
-        Self.logger.info("Hotkey registered: \(combo.displayString), mode=\(mode.rawValue)")
     }
 
     func unregister() {
@@ -73,16 +71,13 @@ final class HotkeyService {
                 }
 
                 if type == .keyDown {
-                    // Ignore key repeat — only fire on initial press
                     guard !service.keyIsDown else {
                         return Unmanaged.passUnretained(event)
                     }
                     service.keyIsDown = true
-                    fputs("[echo-fs] Key DOWN: \(service.registeredCombo.displayString)\n", stderr)
                     service.onKeyDown?()
                 } else if type == .keyUp {
                     service.keyIsDown = false
-                    fputs("[echo-fs] Key UP: \(service.registeredCombo.displayString)\n", stderr)
                     service.onKeyUp?()
                 }
 
@@ -90,7 +85,7 @@ final class HotkeyService {
             },
             userInfo: selfPtr
         ) else {
-            fputs("[echo-fs] Failed to create CGEvent tap\n", stderr)
+            Self.logger.error("Failed to create CGEvent tap")
             return false
         }
 
