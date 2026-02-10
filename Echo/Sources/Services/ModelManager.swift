@@ -13,6 +13,7 @@ final class ModelManager: ObservableObject {
     @Published var downloadError: String?
 
     private let fileManager = FileManager.default
+    private var activeDelegate: DownloadDelegate?
 
     /// Base directory for model storage.
     var modelsDirectory: URL {
@@ -37,7 +38,7 @@ final class ModelManager: ObservableObject {
         }
     }
 
-    /// Download a model from Hugging Face using URLSession with bytes streaming.
+    /// Download a model from Hugging Face using URLSessionDownloadTask for full speed.
     func downloadModel(_ manifest: ModelManifest) async throws {
         guard !isDownloading else { return }
 
@@ -61,7 +62,7 @@ final class ModelManager: ObservableObject {
         Self.logger.info("Starting download: \(manifest.id) from \(manifest.downloadURL)")
 
         do {
-            let tempFileURL = try await downloadWithProgress(from: manifest.downloadURL, expectedSize: manifest.fileSizeBytes)
+            let tempFileURL = try await downloadWithProgress(from: manifest.downloadURL)
 
             // Verify checksum if available
             if !manifest.sha256Checksum.isEmpty {
@@ -110,65 +111,30 @@ final class ModelManager: ObservableObject {
 
     // MARK: - Private
 
-    private func downloadWithProgress(from url: URL, expectedSize: Int64) async throws -> URL {
-        let tempFileURL = fileManager.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".bin")
-
-        let (bytes, response) = try await URLSession.shared.bytes(from: url)
-
-        guard let httpResponse = response as? HTTPURLResponse,
-              (200...299).contains(httpResponse.statusCode) else {
-            let code = (response as? HTTPURLResponse)?.statusCode ?? 0
-            throw ModelError.downloadFailed("HTTP \(code)")
-        }
-
-        let totalSize = httpResponse.expectedContentLength > 0
-            ? httpResponse.expectedContentLength
-            : expectedSize
-
-        fileManager.createFile(atPath: tempFileURL.path, contents: nil)
-        let handle = try FileHandle(forWritingTo: tempFileURL)
-        defer { try? handle.close() }
-
-        var bytesReceived: Int64 = 0
-        var lastProgressUpdate = Date.distantPast
-        let bufferSize = 65_536 // 64KB buffer
-        var buffer = Data()
-        buffer.reserveCapacity(bufferSize)
-
-        for try await byte in bytes {
-            buffer.append(byte)
-
-            if buffer.count >= bufferSize {
-                handle.write(buffer)
-                bytesReceived += Int64(buffer.count)
-                buffer.removeAll(keepingCapacity: true)
-
-                let now = Date()
-                if now.timeIntervalSince(lastProgressUpdate) >= 0.2 {
-                    lastProgressUpdate = now
-                    let progress = totalSize > 0 ? Double(bytesReceived) / Double(totalSize) : 0
-                    self.downloadProgress = progress
-                }
+    private func downloadWithProgress(from url: URL) async throws -> URL {
+        let delegate = DownloadDelegate { [weak self] progress in
+            DispatchQueue.main.async {
+                self?.downloadProgress = progress
             }
         }
+        self.activeDelegate = delegate
 
-        // Flush remaining buffer
-        if !buffer.isEmpty {
-            handle.write(buffer)
-            bytesReceived += Int64(buffer.count)
+        let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
+
+        return try await withCheckedThrowingContinuation { continuation in
+            delegate.continuation = continuation
+
+            let task = session.downloadTask(with: url)
+            task.resume()
         }
-
-        self.downloadProgress = 1.0
-        return tempFileURL
     }
 
     private func computeSHA256(fileURL: URL) throws -> String {
-        // Stream the file in chunks to avoid loading 460MB into memory
         let handle = try FileHandle(forReadingFrom: fileURL)
         defer { handle.closeFile() }
 
         var hasher = SHA256()
-        let chunkSize = 1024 * 1024 // 1MB chunks
+        let chunkSize = 1024 * 1024
         while autoreleasepool(invoking: {
             let data = handle.readData(ofLength: chunkSize)
             guard !data.isEmpty else { return false }
@@ -178,6 +144,48 @@ final class ModelManager: ObservableObject {
 
         let digest = hasher.finalize()
         return digest.map { String(format: "%02x", $0) }.joined()
+    }
+}
+
+// MARK: - Download Delegate
+
+private final class DownloadDelegate: NSObject, URLSessionDownloadDelegate {
+    let onProgress: (Double) -> Void
+    var continuation: CheckedContinuation<URL, Error>?
+
+    init(onProgress: @escaping (Double) -> Void) {
+        self.onProgress = onProgress
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
+                    didWriteData bytesWritten: Int64, totalBytesWritten: Int64,
+                    totalBytesExpectedToWrite: Int64) {
+        if totalBytesExpectedToWrite > 0 {
+            onProgress(Double(totalBytesWritten) / Double(totalBytesExpectedToWrite))
+        }
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask,
+                    didFinishDownloadingTo location: URL) {
+        // Move to stable temp path before system deletes it
+        let stableTempURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString + ".bin")
+        do {
+            try FileManager.default.moveItem(at: location, to: stableTempURL)
+            continuation?.resume(returning: stableTempURL)
+        } catch {
+            continuation?.resume(throwing: ModelError.downloadFailed("Failed to save temp file: \(error.localizedDescription)"))
+        }
+        continuation = nil
+        session.finishTasksAndInvalidate()
+    }
+
+    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        if let error {
+            continuation?.resume(throwing: ModelError.downloadFailed(error.localizedDescription))
+            continuation = nil
+            session.finishTasksAndInvalidate()
+        }
     }
 }
 
