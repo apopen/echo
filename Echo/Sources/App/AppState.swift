@@ -14,6 +14,7 @@ final class AppState: ObservableObject {
     @Published var isModelLoaded: Bool = false
     @Published var hasCompletedOnboarding: Bool = false
     @Published var audioLevel: Float = 0.0
+    @Published var aiProcessingActive: Bool = false
 
     // MARK: - Services
 
@@ -24,6 +25,7 @@ final class AppState: ObservableObject {
     let transcriptionService = TranscriptionService()
     let insertionService = InsertionService()
     let processingPipeline = ProcessingPipeline()
+    let aiPostProcessor = AIPostProcessor()
     let modelManager = ModelManager()
 
     private var cancellables = Set<AnyCancellable>()
@@ -149,11 +151,19 @@ final class AppState: ObservableObject {
                     return
                 }
 
-                let processedText = processingPipeline.process(
+                var processedText = processingPipeline.process(
                     rawText,
                     settings: settingsStore.processingSettings,
                     appBundleID: NSWorkspace.shared.frontmostApplication?.bundleIdentifier
                 )
+
+                if settingsStore.processingSettings.aiPostProcessingEnabled && AIPostProcessor.isAvailable {
+                    aiProcessingActive = true
+                    processedText = await aiPostProcessor.improve(processedText)
+                    // Hold sparkle visible for at least 1.5s so the effect is perceptible
+                    try? await Task.sleep(nanoseconds: 1_500_000_000)
+                    aiProcessingActive = false
+                }
 
                 recordingState = .inserting
                 await insertText(processedText)

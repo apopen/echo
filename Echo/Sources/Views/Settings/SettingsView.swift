@@ -233,6 +233,18 @@ struct ProcessingSettingsView: View {
                 ))
             }
 
+            if AIPostProcessor.isAvailable {
+                Section("Apple Intelligence") {
+                    Toggle("Improve transcripts with Apple Intelligence", isOn: Binding(
+                        get: { appState.settingsStore.processingSettings.aiPostProcessingEnabled },
+                        set: {
+                            appState.settingsStore.processingSettings.aiPostProcessingEnabled = $0
+                            appState.settingsStore.save()
+                        }
+                    ))
+                }
+            }
+
             if appState.settingsStore.processingSettings.customReplacementsEnabled {
                 Section("Replacement Rules") {
                     ReplacementRulesEditor(

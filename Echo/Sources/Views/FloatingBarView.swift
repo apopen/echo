@@ -6,6 +6,7 @@ struct FloatingBarView: View {
     @ObservedObject var appState: AppState
     @State private var wavePhase: CGFloat = 0
     @State private var displayLevel: CGFloat = 0
+    @State private var sparkleIntensity: CGFloat = 0
     @State private var timer: Timer?
 
     // This is the animated state — driven by withAnimation so transitions are smooth.
@@ -44,14 +45,21 @@ struct FloatingBarView: View {
                 .padding(.vertical, 4)
                 .opacity(isRecording ? 1 : 0)
 
-            // Transcribing dots
-            HStack(spacing: 6) {
-                ForEach(0..<3, id: \.self) { i in
-                    Circle()
-                        .fill(Color.blue.opacity(0.8))
-                        .frame(width: 6, height: 6)
-                        .scaleEffect(pulseScale(for: i))
+            // Transcribing dots with AI sparkle overlay
+            ZStack {
+                HStack(spacing: 6) {
+                    ForEach(0..<3, id: \.self) { i in
+                        Circle()
+                            .fill(Color.blue.opacity(0.8))
+                            .frame(width: 6, height: 6)
+                            .scaleEffect(pulseScale(for: i))
+                    }
                 }
+
+                // Neon green sparkles around the dots when AI is processing
+                SparkleOverlay(phase: wavePhase, intensity: sparkleIntensity)
+                    .frame(width: 60, height: 24)
+                    .allowsHitTesting(false)
             }
             .opacity(isTranscribing ? 1 : 0)
         }
@@ -112,6 +120,14 @@ struct FloatingBarView: View {
                 } else {
                     displayLevel = displayLevel * 0.7
                 }
+
+                // Smoothly ramp sparkle intensity — fast attack, slow decay
+                let sparkleTarget: CGFloat = appState.aiProcessingActive ? 1.0 : 0.0
+                if sparkleTarget > sparkleIntensity {
+                    sparkleIntensity += (sparkleTarget - sparkleIntensity) * 0.25
+                } else {
+                    sparkleIntensity += (sparkleTarget - sparkleIntensity) * 0.04
+                }
             }
         }
     }
@@ -151,6 +167,63 @@ struct WaveformView: View {
                     path,
                     with: .color(Color.blue.opacity(opacity)),
                     lineWidth: 2.0 - CGFloat(wave) * 0.4
+                )
+            }
+        }
+    }
+}
+
+/// Subtle neon-green sparkle particles that orbit around the transcribing dots
+/// when Apple Intelligence post-processing is active.
+struct SparkleOverlay: View {
+    let phase: CGFloat
+    let intensity: CGFloat
+
+    /// 6 particles with fixed angular seed offsets.
+    private static let seeds: [(angle: CGFloat, radius: CGFloat, speed: CGFloat)] = [
+        (0.0,   0.7, 1.0),
+        (1.05,  0.5, 1.3),
+        (2.1,   0.9, 0.8),
+        (3.14,  0.6, 1.1),
+        (4.19,  0.8, 0.9),
+        (5.24,  0.4, 1.4),
+    ]
+
+    var body: some View {
+        Canvas { context, size in
+            guard intensity > 0.01 else { return }
+
+            let centerX = size.width / 2
+            let centerY = size.height / 2
+            let maxRadius = min(size.width, size.height) / 2
+
+            for (i, seed) in Self.seeds.enumerated() {
+                // Orbit angle advances over time at varying speeds
+                let angle = seed.angle + phase * 0.12 * seed.speed
+                let orbitRadius = maxRadius * seed.radius
+
+                let x = centerX + cos(angle) * orbitRadius
+                let y = centerY + sin(angle) * orbitRadius * 0.6  // Slightly squashed ellipse
+
+                // Each particle twinkles independently
+                let twinkle = sin(phase * 1.5 + CGFloat(i) * 2.1)
+                let normalizedTwinkle = (twinkle + 1) / 2  // 0...1
+                let particleOpacity = intensity * Double(0.25 + 0.75 * normalizedTwinkle)
+                let radius: CGFloat = 1.0 + 0.6 * normalizedTwinkle
+
+                // Core sparkle dot
+                let rect = CGRect(x: x - radius, y: y - radius, width: radius * 2, height: radius * 2)
+                context.fill(
+                    Path(ellipseIn: rect),
+                    with: .color(Color(red: 0.2, green: 1.0, blue: 0.4).opacity(particleOpacity))
+                )
+
+                // Soft glow halo
+                let glowRadius = radius * 2.5
+                let glowRect = CGRect(x: x - glowRadius, y: y - glowRadius, width: glowRadius * 2, height: glowRadius * 2)
+                context.fill(
+                    Path(ellipseIn: glowRect),
+                    with: .color(Color(red: 0.2, green: 1.0, blue: 0.4).opacity(particleOpacity * 0.15))
                 )
             }
         }

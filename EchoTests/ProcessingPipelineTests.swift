@@ -111,6 +111,22 @@ final class ProcessingPipelineTests: XCTestCase {
 
     // MARK: - Processing Order
 
+    // MARK: - AI Post-Processing Settings
+
+    func testAIPostProcessingEnabled_defaultsToTrue() {
+        let settings = ProcessingSettings()
+        XCTAssertTrue(settings.aiPostProcessingEnabled)
+    }
+
+    func testAIPostProcessor_isAvailable_returnsBool() {
+        // Smoke test — verifies the availability check doesn't crash.
+        // On macOS < 26 this returns false; on macOS 26+ it returns true.
+        let available = AIPostProcessor.isAvailable
+        XCTAssertNotNil(available)
+    }
+
+    // MARK: - Processing Order
+
     func testProcessingOrder_isDeterministic() {
         var settings = ProcessingSettings()
         settings.fillerRemovalEnabled = true

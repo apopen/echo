@@ -7,6 +7,7 @@ struct ProcessingSettings: Codable, Equatable {
     var punctuationFormattingEnabled: Bool = false
     var customReplacementsEnabled: Bool = false
     var customReplacements: [ReplacementRule] = []
+    var aiPostProcessingEnabled: Bool = true
 }
 
 /// A single find-and-replace rule.
