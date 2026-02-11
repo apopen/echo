@@ -71,12 +71,22 @@ final class HotkeyService {
                 }
 
                 if type == .keyDown {
+                    // Check that the relevant modifier flags match on keyDown
+                    let eventModifiers = event.flags.intersection(HotkeyCombo.relevantModifiersMask)
+                    guard eventModifiers == service.registeredCombo.relevantModifiers else {
+                        return Unmanaged.passUnretained(event)
+                    }
                     guard !service.keyIsDown else {
                         return Unmanaged.passUnretained(event)
                     }
                     service.keyIsDown = true
                     service.onKeyDown?()
                 } else if type == .keyUp {
+                    // Skip modifier check on keyUp — modifiers may already be
+                    // released by the time the main key comes up.
+                    guard service.keyIsDown else {
+                        return Unmanaged.passUnretained(event)
+                    }
                     service.keyIsDown = false
                     service.onKeyUp?()
                 }

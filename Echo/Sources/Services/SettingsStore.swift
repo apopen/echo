@@ -18,6 +18,7 @@ final class SettingsStore: ObservableObject {
         static let maxRecordingDuration = "maxRecordingDuration"
         static let hasCompletedOnboarding = "hasCompletedOnboarding"
         static let appRules = "appRules"
+        static let insertionMode = "insertionMode"
     }
 
     // MARK: - Properties
@@ -27,6 +28,7 @@ final class SettingsStore: ObservableObject {
     @Published var selectedModelID: String = "whisper-small.en"
     @Published var processingSettings: ProcessingSettings = ProcessingSettings()
 
+    @Published var insertionMode: InsertionMode = .copyToClipboard
     @Published var launchAtLogin: Bool = false
     @Published var maxRecordingDuration: TimeInterval = 120
     @Published var hasCompletedOnboarding: Bool = false
@@ -52,6 +54,11 @@ final class SettingsStore: ObservableObject {
         if let data = defaults.data(forKey: Keys.processingSettings),
            let settings = try? JSONDecoder().decode(ProcessingSettings.self, from: data) {
             processingSettings = settings
+        }
+
+        if let modeRaw = defaults.string(forKey: Keys.insertionMode),
+           let mode = InsertionMode(rawValue: modeRaw) {
+            insertionMode = mode
         }
 
         launchAtLogin = defaults.bool(forKey: Keys.launchAtLogin)

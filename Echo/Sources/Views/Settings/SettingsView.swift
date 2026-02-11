@@ -50,9 +50,20 @@ struct GeneralSettingsView: View {
             Section("Trigger") {
                 HStack {
                     Text("Recording trigger:")
-                    Text(appState.settingsStore.hotkeyCombo.displayString)
-                        .bold()
                     Spacer()
+                    HotkeyRecorderView(
+                        combo: Binding(
+                            get: { appState.settingsStore.hotkeyCombo },
+                            set: { appState.settingsStore.hotkeyCombo = $0 }
+                        ),
+                        onChanged: {
+                            appState.settingsStore.save()
+                            appState.hotkeyService.register(
+                                combo: appState.settingsStore.hotkeyCombo,
+                                mode: appState.settingsStore.recordMode
+                            )
+                        }
+                    )
                 }
             }
 

@@ -11,14 +11,12 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/Justmalhar/WhisperCppKit.git", from: "0.1.1"),
-        .package(url: "https://github.com/soffes/HotKey.git", from: "0.2.1"),
     ],
     targets: [
         .executableTarget(
             name: "Echo",
             dependencies: [
                 .product(name: "WhisperCppKit", package: "WhisperCppKit"),
-                "HotKey",
             ],
             path: "Echo/Sources",
             resources: [

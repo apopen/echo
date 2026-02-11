@@ -234,12 +234,24 @@ struct HotkeySetupStepView: View {
                 .font(.system(size: 36))
                 .foregroundColor(.accentColor)
 
-            Text("Recording is triggered by:")
-            Text(appState.settingsStore.hotkeyCombo.displayString)
-                .font(.title)
-                .bold()
-                .padding()
-                .background(RoundedRectangle(cornerRadius: 8).fill(Color.secondary.opacity(0.1)))
+            Text("Click Record and press the key combination you want to use.")
+                .font(.callout)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+
+            HotkeyRecorderView(
+                combo: Binding(
+                    get: { appState.settingsStore.hotkeyCombo },
+                    set: { appState.settingsStore.hotkeyCombo = $0 }
+                ),
+                onChanged: {
+                    appState.settingsStore.save()
+                    appState.hotkeyService.register(
+                        combo: appState.settingsStore.hotkeyCombo,
+                        mode: appState.settingsStore.recordMode
+                    )
+                }
+            )
 
             Picker("Recording Mode", selection: Binding(
                 get: { appState.settingsStore.recordMode },
