@@ -108,6 +108,8 @@ Choose how transcribed text is delivered:
 
 ### Smart Text Processing
 
+If you are running MacOS 26+, by default Echo will integrate with Applie Intelligence and implmement post processing on the text before pasting it. This will drastically clean up the data automatically. Like all other processing, this is fully completed on device and never leaves your machine.
+
 Clean up transcriptions automatically (all optional and toggleable):
 
 - Remove filler words (um, uh, like...)
