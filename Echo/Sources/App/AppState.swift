@@ -170,8 +170,8 @@ final class AppState: ObservableObject {
         let autoSend = settingsStore.shouldAutoSend(forBundleID: bundleID)
 
         do {
-            try await insertionService.insert(text, autoSend: autoSend)
-            Self.logger.info("Text copied to clipboard: '\(text)'")
+            try await insertionService.insert(text, autoSend: autoSend, mode: settingsStore.insertionMode)
+            Self.logger.info("Text inserted (\(self.settingsStore.insertionMode.rawValue)): '\(text)'")
         } catch {
             Self.logger.error("Insertion failed: \(error)")
         }

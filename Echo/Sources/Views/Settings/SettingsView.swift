@@ -82,6 +82,20 @@ struct GeneralSettingsView: View {
                 .pickerStyle(.segmented)
             }
 
+            Section("Output") {
+                Picker("After transcription", selection: Binding(
+                    get: { appState.settingsStore.insertionMode },
+                    set: {
+                        appState.settingsStore.insertionMode = $0
+                        appState.settingsStore.save()
+                    }
+                )) {
+                    Text("Copy to Clipboard").tag(InsertionMode.copyToClipboard)
+                    Text("Paste at Cursor").tag(InsertionMode.pasteInPlace)
+                }
+                .pickerStyle(.segmented)
+            }
+
             Section("Recording") {
                 HStack {
                     Text("Max duration:")

@@ -84,6 +84,7 @@ final class SettingsStore: ObservableObject {
         if let data = try? JSONEncoder().encode(processingSettings) {
             defaults.set(data, forKey: Keys.processingSettings)
         }
+        defaults.set(insertionMode.rawValue, forKey: Keys.insertionMode)
         defaults.set(launchAtLogin, forKey: Keys.launchAtLogin)
         defaults.set(maxRecordingDuration, forKey: Keys.maxRecordingDuration)
         defaults.set(hasCompletedOnboarding, forKey: Keys.hasCompletedOnboarding)
