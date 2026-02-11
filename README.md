@@ -14,6 +14,10 @@
 </p>
 
 <p align="center">
+  <img src="assets/echo-recording.png" alt="Echo recording waveform" width="600">
+</p>
+
+<p align="center">
   <a href="#quick-start">Quick Start</a> &bull;
   <a href="#features">Features</a> &bull;
   <a href="#how-it-works">How It Works</a> &bull;
