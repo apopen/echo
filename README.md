@@ -18,11 +18,11 @@
   <img src="assets/echo-recording.png" alt="Echo recording waveform" width="600">
 </p>
 
-<p align="center">
+<!-- <p align="center">
   <a href="https://github.com/apopen/echo/releases/latest">
     <img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download_Echo-black?style=for-the-badge&logo=apple&logoColor=white" alt="Download Echo" height="40">
   </a>
-</p>
+</p> -->
 <p align="center">
   <a href="https://github.com/apopen/echo/releases/latest"><img src="https://img.shields.io/github/v/release/apopen/echo?label=latest%20release&style=flat-square" alt="Latest Release"></a>
 </p>

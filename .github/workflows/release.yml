@@ -100,7 +100,7 @@ jobs:
 
       - name: Update Homebrew tap
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           SHA256=$(shasum -a 256 "dist/Echo-${GITHUB_REF_NAME}-macos-arm64.zip" | awk '{print $1}')
