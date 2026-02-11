@@ -35,7 +35,7 @@
 
 ```bash
 git clone <repo-url>
-cd echo-fs
+cd echo
 swift build
 swift run Echo
 ```
@@ -54,36 +54,47 @@ That's it. Echo lives in your menu bar and is always one keypress away.
 ## Features
 
 ### Dictate Anywhere
+
 Press your hotkey in **any** app — text editors, email, Slack, browsers, terminals — and speak naturally. Your words appear as text when you stop.
 
 ### Two Recording Modes
+
 - **Hold to Record** — press and hold the hotkey while speaking, release to finish
 - **Toggle** — press once to start recording, press again to stop
 
 ### Configurable Hotkey
+
 Set any key or key combination (e.g. `F5`, `⌘⇧D`, `Page Down`) as your trigger. Change it anytime in Settings or during onboarding.
 
 ### Copy or Paste — Your Choice
+
 Choose how transcribed text is delivered:
+
 - **Copy to Clipboard** — text lands on your clipboard, paste it wherever you want
 - **Paste at Cursor** — text is automatically pasted where your cursor is, no extra step
 
 ### Smart Text Processing
+
 Clean up transcriptions automatically (all optional and toggleable):
+
 - Remove filler words (um, uh, like...)
 - Normalize spoken numbers ("three" becomes "3")
 - Fix punctuation and capitalization
 - Apply custom find-and-replace rules for names, acronyms, and jargon
 
 ### Per-App Rules
+
 Configure app-specific behavior:
+
 - Auto-send (simulate Enter after insertion) for chat apps like Slack
 - Custom processing overrides per app
 
 ### On-Device Transcription
+
 Powered by [whisper.cpp](https://github.com/ggerganov/whisper.cpp) with Metal GPU acceleration on Apple Silicon. Transcription is fast — typically under 1 second for short utterances.
 
 ### Voice Activity Detection
+
 Built-in VAD filters out silence and background noise so you don't get phantom text from quiet recordings.
 
 ---
@@ -113,20 +124,20 @@ No audio is ever written to disk. No network requests are made. Everything happe
 
 Open Settings from the Echo menu bar icon. Available options:
 
-| Section | Setting | Description |
-|---------|---------|-------------|
-| **Trigger** | Recording hotkey | Any key or key combo (click Record to set) |
-| **Recording Mode** | Hold / Toggle | Hold to record or toggle on/off |
-| **Output** | Copy to Clipboard / Paste at Cursor | How transcribed text is delivered |
-| **Recording** | Max duration | Auto-stop after N seconds (default: 120) |
-| **Models** | Selected model | Switch between downloaded models |
-| **Processing** | Filler removal | Remove "um", "uh", "like", etc. |
-| | Number normalization | "three" becomes "3" |
-| | Punctuation formatting | Auto-capitalize and fix spacing |
-| | Custom replacements | Your own find/replace rules |
-| **App Rules** | Per-app config | Auto-send, custom processing per app |
-| **Permissions** | Mic / Accessibility | Status and quick-fix links |
-| **System** | Launch at Login | Start Echo when you log in |
+| Section            | Setting                             | Description                                |
+| ------------------ | ----------------------------------- | ------------------------------------------ |
+| **Trigger**        | Recording hotkey                    | Any key or key combo (click Record to set) |
+| **Recording Mode** | Hold / Toggle                       | Hold to record or toggle on/off            |
+| **Output**         | Copy to Clipboard / Paste at Cursor | How transcribed text is delivered          |
+| **Recording**      | Max duration                        | Auto-stop after N seconds (default: 120)   |
+| **Models**         | Selected model                      | Switch between downloaded models           |
+| **Processing**     | Filler removal                      | Remove "um", "uh", "like", etc.            |
+|                    | Number normalization                | "three" becomes "3"                        |
+|                    | Punctuation formatting              | Auto-capitalize and fix spacing            |
+|                    | Custom replacements                 | Your own find/replace rules                |
+| **App Rules**      | Per-app config                      | Auto-send, custom processing per app       |
+| **Permissions**    | Mic / Accessibility                 | Status and quick-fix links                 |
+| **System**         | Launch at Login                     | Start Echo when you log in                 |
 
 ---
 
@@ -134,10 +145,10 @@ Open Settings from the Echo menu bar icon. Available options:
 
 Echo uses whisper.cpp GGML models downloaded from Hugging Face during setup. Models are verified with SHA256 checksums and stored locally.
 
-| Model | Size | Languages | Best For |
-|-------|------|-----------|----------|
-| **whisper-small.en** | ~460 MB | English only | Fastest transcription for English speakers |
-| **whisper-small** | ~460 MB | 100+ languages | Multilingual support |
+| Model                | Size    | Languages      | Best For                                   |
+| -------------------- | ------- | -------------- | ------------------------------------------ |
+| **whisper-small.en** | ~460 MB | English only   | Fastest transcription for English speakers |
+| **whisper-small**    | ~460 MB | 100+ languages | Multilingual support                       |
 
 You can download additional models or switch between them in Settings > Models. Models are stored in `~/Library/Application Support/Echo/Models/` and can be deleted from the app.
 
@@ -147,15 +158,15 @@ You can download additional models or switch between them in Settings > Models. 
 
 Echo is designed around a simple principle: **your voice and your words stay on your machine**.
 
-| Guarantee | Detail |
-|-----------|--------|
-| **No cloud processing** | All transcription runs locally via whisper.cpp with Metal GPU acceleration |
-| **No telemetry** | Zero analytics, crash reports, or usage tracking |
-| **No audio storage** | Raw audio is never written to disk — it lives in memory only during recording |
-| **No transcript storage** | Transcriptions are delivered and discarded — nothing is logged |
-| **No network requests** | After the one-time model download, Echo makes zero network calls |
-| **Local data only** | Settings and models live in `~/Library/Application Support/Echo/` |
-| **User-controlled deletion** | Delete models and reset settings from within the app |
+| Guarantee                    | Detail                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| **No cloud processing**      | All transcription runs locally via whisper.cpp with Metal GPU acceleration    |
+| **No telemetry**             | Zero analytics, crash reports, or usage tracking                              |
+| **No audio storage**         | Raw audio is never written to disk — it lives in memory only during recording |
+| **No transcript storage**    | Transcriptions are delivered and discarded — nothing is logged                |
+| **No network requests**      | After the one-time model download, Echo makes zero network calls              |
+| **Local data only**          | Settings and models live in `~/Library/Application Support/Echo/`             |
+| **User-controlled deletion** | Delete models and reset settings from within the app                          |
 
 ---
 
@@ -187,8 +198,8 @@ Dependencies are resolved automatically by Swift Package Manager on first build.
 
 ### Dependencies
 
-| Package | Purpose |
-|---------|---------|
+| Package                                                      | Purpose                                          |
+| ------------------------------------------------------------ | ------------------------------------------------ |
 | [WhisperCppKit](https://github.com/Justmalhar/WhisperCppKit) | Local speech recognition with Metal acceleration |
 
 All other functionality uses Apple system frameworks (AVAudioEngine, SwiftUI, AppKit, Accessibility, CoreGraphics).
@@ -212,26 +223,31 @@ echo-fs/
 ## Troubleshooting
 
 ### Echo isn't responding to my hotkey
+
 - **Check Accessibility permission**: System Settings > Privacy & Security > Accessibility — make sure your terminal app (Terminal, iTerm2, Ghostty, etc.) or Echo is listed and enabled
 - **Check Input Monitoring**: Some macOS versions also require Input Monitoring permission
 - Open Echo Settings > Permissions and click **Refresh Permissions** to verify status
 
 ### Transcription produces no text
+
 - Make sure a model is downloaded (Settings > Models)
 - Check that your microphone is working and the correct input device is selected
 - Speak clearly and close to the microphone — the VAD will filter very quiet audio
 
 ### Text isn't appearing in my app
+
 - **Paste at Cursor mode** requires Accessibility permission to simulate keystrokes
 - Some apps with protected text fields may not accept simulated paste — switch to **Copy to Clipboard** mode and paste manually
 - Check Settings > Output to confirm which mode is active
 
 ### Model download failed
+
 - Check your internet connection
 - Try deleting the partial download in Settings > Models and re-downloading
 - Models are downloaded from Hugging Face — ensure it's accessible from your network
 
 ### High memory usage
+
 - Each model uses ~460 MB in memory when loaded. This is expected for on-device inference
 - Idle memory (without a model loaded) should be under 250 MB
 
@@ -266,17 +282,17 @@ A: No. Audio is captured in memory, transcribed locally, and discarded. It is ne
 
 For contributors and the technically curious — Echo is a native Swift/SwiftUI menu bar app built as an SPM executable.
 
-| Module | Responsibility |
-|--------|---------------|
-| `AppState` | Central coordinator, state machine, service wiring |
-| `HotkeyService` | Global keyboard monitoring via CGEvent tap |
-| `RecordingService` | AVAudioEngine capture, 16kHz resampling, duration limits |
-| `TranscriptionService` | whisper.cpp inference with VAD on background queue |
-| `ProcessingPipeline` | Text transforms (fillers, numbers, replacements, punctuation) |
-| `InsertionService` | Clipboard copy or paste-at-cursor via CGEvent |
-| `ModelManager` | Model download, SHA256 verification, storage |
-| `SettingsStore` | Persistent configuration via UserDefaults |
-| `PermissionService` | Microphone and accessibility permission checks |
+| Module                 | Responsibility                                                |
+| ---------------------- | ------------------------------------------------------------- |
+| `AppState`             | Central coordinator, state machine, service wiring            |
+| `HotkeyService`        | Global keyboard monitoring via CGEvent tap                    |
+| `RecordingService`     | AVAudioEngine capture, 16kHz resampling, duration limits      |
+| `TranscriptionService` | whisper.cpp inference with VAD on background queue            |
+| `ProcessingPipeline`   | Text transforms (fillers, numbers, replacements, punctuation) |
+| `InsertionService`     | Clipboard copy or paste-at-cursor via CGEvent                 |
+| `ModelManager`         | Model download, SHA256 verification, storage                  |
+| `SettingsStore`        | Persistent configuration via UserDefaults                     |
+| `PermissionService`    | Microphone and accessibility permission checks                |
 
 See [DESIGN.md](DESIGN.md) for the full technical design document.
 
