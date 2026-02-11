@@ -8,13 +8,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let appState = AppState()
     let windowManager = WindowManager()
     let floatingBar = FloatingBarWindow()
-    let updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+    let updaterController = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
     private var statusItem: NSStatusItem?
     private var statusBarController: StatusBarController?
     private var cancellables = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusBar()
+        startUpdaterIfAvailable()
         appState.initialize()
         floatingBar.show(appState: appState)
 
@@ -66,6 +67,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func showOnboarding() {
         windowManager.showOnboarding(appState: appState)
+    }
+
+    private func startUpdaterIfAvailable() {
+        if Bundle.main.object(forInfoDictionaryKey: "SUFeedURL") != nil {
+            updaterController.startUpdater()
+        }
     }
 
     private func setupStatusBar() {
