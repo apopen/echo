@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/echo-recording.png" alt="Echo recording waveform" width="600">
+  <img src="assets/echo-demo.gif" alt="Echo demo — hold a key, speak, release" width="600">
 </p>
 
 <!-- <p align="center">
