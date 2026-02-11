@@ -25,6 +25,11 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(store.maxRecordingDuration, 120)
     }
 
+    func testDefaultShowWaveformInMenuBar() {
+        let store = SettingsStore()
+        XCTAssertFalse(store.showWaveformInMenuBar)
+    }
+
     // MARK: - App Rule Helpers
 
     func testShouldAutoSend_noRules() {
