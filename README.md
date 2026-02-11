@@ -47,10 +47,10 @@
 
 ```bash
 brew tap apopen/echo
-brew install --cask echo
+brew install --no-quarantine --cask echo
 ```
 
-That's it — no quarantine warnings, no extra steps. To update later: `brew upgrade --cask echo`
+The `--no-quarantine` flag prevents macOS Gatekeeper warnings since the app is not notarized by Apple. To update later: `brew upgrade --no-quarantine --cask echo`
 
 ### Or download manually
 
