@@ -46,7 +46,8 @@ Pods/
 .vscode/
 
 # Models (downloaded at runtime, too large for git)
-Models/
+# Only ignore the top-level Models dir — not Echo/Sources/Models/ (source code)
+/Models/
 *.bin
 *.ggml
 
