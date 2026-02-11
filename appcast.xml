@@ -4,14 +4,14 @@
     <title>Echo Updates</title>
     <link>https://apopen.github.io/echo/appcast.xml</link>
     <item>
-      <title>Version 0.0.13</title>
-      <sparkle:version>0.0.13</sparkle:version>
-      <sparkle:shortVersionString>0.0.13</sparkle:shortVersionString>
-      <pubDate>Wed, 11 Feb 2026 22:19:15 +0000</pubDate>
-      <enclosure url="https://github.com/apopen/echo/releases/download/v0.0.13/Echo-v0.0.13-macos-arm64.zip"
+      <title>Version 0.0.14</title>
+      <sparkle:version>0.0.14</sparkle:version>
+      <sparkle:shortVersionString>0.0.14</sparkle:shortVersionString>
+      <pubDate>Wed, 11 Feb 2026 22:26:51 +0000</pubDate>
+      <enclosure url="https://github.com/apopen/echo/releases/download/v0.0.14/Echo-v0.0.14-macos-arm64.zip"
                  type="application/octet-stream"
-                 sparkle:edSignature="vMyIIisNDGeanV1h8YQuJqgANYnVF2mLNNKePJfETNC5L8+0krNROUS98oY29cEGt3KDkHCYEMN8g/4Oo3hqAA=="
-                 length="2962292" />
+                 sparkle:edSignature="RK+oc+3elelYFhbP5JdB0Brl3iejzqh6Aprb5JLcBZBjBr59dgwNQPkJ5kkQAPSL27cxN+Ve9YQfGVmp2emvBw=="
+                 length="3901120" />
     </item>
   </channel>
 </rss>
