@@ -25,7 +25,6 @@
 </p>
 <p align="center">
   <a href="https://github.com/apopen/echo/releases/latest"><img src="https://img.shields.io/github/v/release/apopen/echo?label=latest%20release&style=flat-square" alt="Latest Release"></a>
-  <a href="https://github.com/apopen/echo/releases/latest"><img src="https://img.shields.io/github/downloads/apopen/echo/total?style=flat-square&label=downloads" alt="Downloads"></a>
 </p>
 
 <p align="center">
@@ -45,11 +44,19 @@
 ## Quick Start
 
 ### Download
+
 1. Grab the latest **Echo.app** from the [Releases page](https://github.com/apopen/echo/releases/latest)
 2. Unzip and drag **Echo.app** to your Applications folder
-3. Launch Echo from Applications
+3. **Remove the quarantine flag** (required because the app is not notarized by Apple):
+   ```bash
+   xattr -cr /Applications/Echo.app
+   ```
+4. Launch Echo from Applications
+
+> **Why is this needed?** macOS Gatekeeper blocks apps downloaded from the internet that aren't signed with an Apple Developer certificate. The `xattr -cr` command removes the quarantine flag so macOS will let you open it. This is standard for open-source Mac apps distributed outside the App Store.
 
 ### Or build from source
+
 ```bash
 git clone https://github.com/apopen/echo.git
 cd echo
@@ -238,6 +245,16 @@ echo-fs/
 ---
 
 ## Troubleshooting
+
+### "Echo is damaged and can't be opened"
+
+This is macOS Gatekeeper blocking the app because it isn't notarized by Apple. Run this command to fix it:
+
+```bash
+xattr -cr /Applications/Echo.app
+```
+
+Then open Echo again. This only needs to be done once.
 
 ### Echo isn't responding to my hotkey
 

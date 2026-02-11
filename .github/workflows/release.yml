@@ -81,6 +81,9 @@ jobs:
           # Replace version placeholder
           sed -i '' "s/VERSIONPLACEHOLDER/${VERSION}/g" dist/Echo.app/Contents/Info.plist
 
+          # Ad-hoc code sign the binary
+          codesign --force --deep -s - dist/Echo.app
+
           # Package as zip (standard macOS app distribution format)
           cd dist
           ditto -c -k --keepParent Echo.app "Echo-${GITHUB_REF_NAME}-macos-arm64.zip"
