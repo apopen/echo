@@ -162,4 +162,24 @@ final class HotkeyComboTests: XCTestCase {
     func testValidCombo_standaloneEnd() {
         XCTAssertTrue(KeyCodeNames.isValidCombo(keyCode: UInt16(kVK_End), modifiers: CGEventFlags()))
     }
+
+    // MARK: - Fn (Globe) Key Support
+
+    func testValidCombo_fnPlusLetter() {
+        XCTAssertTrue(KeyCodeNames.isValidCombo(keyCode: UInt16(kVK_ANSI_L), modifiers: .maskSecondaryFn))
+    }
+
+    func testDisplayStringWithFn() {
+        var combo = HotkeyCombo()
+        combo.keyCode = UInt16(kVK_ANSI_L)
+        combo.cgEventFlags = .maskSecondaryFn
+        XCTAssertEqual(combo.displayString, "FnL")
+    }
+
+    func testDisplayStringWithFnAndCommand() {
+        var combo = HotkeyCombo()
+        combo.keyCode = UInt16(kVK_ANSI_L)
+        combo.cgEventFlags = CGEventFlags([.maskSecondaryFn, .maskCommand])
+        XCTAssertEqual(combo.displayString, "Fn\u{2318}L")
+    }
 }

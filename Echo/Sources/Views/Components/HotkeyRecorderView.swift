@@ -123,6 +123,7 @@ struct HotkeyRecorderView: View {
         if flags.contains(.shift)    { result.insert(.maskShift) }
         if flags.contains(.option)   { result.insert(.maskAlternate) }
         if flags.contains(.control)  { result.insert(.maskControl) }
+        if flags.contains(.function) { result.insert(.maskSecondaryFn) }
         return result
     }
 }

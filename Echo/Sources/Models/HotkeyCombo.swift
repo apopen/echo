@@ -17,9 +17,9 @@ struct HotkeyCombo: Codable, Equatable {
 
     init() {}
 
-    /// The four modifier flags we care about for hotkey matching.
+    /// The five modifier flags we care about for hotkey matching.
     static let relevantModifiersMask = CGEventFlags([
-        .maskCommand, .maskShift, .maskAlternate, .maskControl,
+        .maskCommand, .maskShift, .maskAlternate, .maskControl, .maskSecondaryFn,
     ])
 
     // MARK: - CGEventFlags bridging
@@ -40,6 +40,7 @@ struct HotkeyCombo: Codable, Equatable {
         var parts: [String] = []
 
         let flags = relevantModifiers
+        if flags.contains(.maskSecondaryFn) { parts.append("Fn") }      // Fn
         if flags.contains(.maskControl)   { parts.append("\u{2303}") }  // ⌃
         if flags.contains(.maskAlternate)  { parts.append("\u{2325}") } // ⌥
         if flags.contains(.maskShift)      { parts.append("\u{21E7}") } // ⇧
