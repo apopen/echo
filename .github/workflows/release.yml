@@ -107,7 +107,7 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           ZIP_PATH="dist/Echo-${GITHUB_REF_NAME}-macos-arm64.zip"
-          SIGNATURE=$(echo "$SPARKLE_PRIVATE_KEY" | /tmp/sparkle/bin/sign_update "$ZIP_PATH" --ed-key-file -)
+          SIGNATURE=$(echo "$SPARKLE_PRIVATE_KEY" | /tmp/sparkle/bin/sign_update "$ZIP_PATH" --ed-key-file - -p)
           echo "SPARKLE_SIGNATURE=${SIGNATURE}" >> "$GITHUB_ENV"
           echo "ZIP_LENGTH=$(stat -f%z "$ZIP_PATH")" >> "$GITHUB_ENV"
 
