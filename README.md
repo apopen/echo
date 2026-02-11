@@ -1,8 +1,9 @@
 <p align="center">
+  <a href="https://github.com/apopen/echo/actions/workflows/ci.yml"><img src="https://github.com/apopen/echo/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/platform-macOS%2014%2B-blue?style=flat-square" alt="macOS 14+">
   <img src="https://img.shields.io/badge/chip-Apple%20Silicon-black?style=flat-square" alt="Apple Silicon">
   <img src="https://img.shields.io/badge/swift-5.10-orange?style=flat-square" alt="Swift 5.10">
-  <img src="https://img.shields.io/badge/license-Private-lightgrey?style=flat-square" alt="License">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green?style=flat-square" alt="MIT License"></a>
 </p>
 
 <h1 align="center">Echo</h1>
@@ -15,6 +16,16 @@
 
 <p align="center">
   <img src="assets/echo-recording.png" alt="Echo recording waveform" width="600">
+</p>
+
+<p align="center">
+  <a href="https://github.com/apopen/echo/releases/latest">
+    <img src="https://img.shields.io/badge/%E2%AC%87%EF%B8%8F_Download_Echo-black?style=for-the-badge&logo=apple&logoColor=white" alt="Download Echo" height="40">
+  </a>
+</p>
+<p align="center">
+  <a href="https://github.com/apopen/echo/releases/latest"><img src="https://img.shields.io/github/v/release/apopen/echo?label=latest%20release&style=flat-square" alt="Latest Release"></a>
+  <a href="https://github.com/apopen/echo/releases/latest"><img src="https://img.shields.io/github/downloads/apopen/echo/total?style=flat-square&label=downloads" alt="Downloads"></a>
 </p>
 
 <p align="center">
@@ -33,8 +44,14 @@
 
 ## Quick Start
 
+### Download
+1. Grab the latest **Echo.app** from the [Releases page](https://github.com/apopen/echo/releases/latest)
+2. Unzip and drag **Echo.app** to your Applications folder
+3. Launch Echo from Applications
+
+### Or build from source
 ```bash
-git clone <repo-url>
+git clone https://github.com/apopen/echo.git
 cd echo
 swift build
 swift run Echo
@@ -300,4 +317,4 @@ See [DESIGN.md](DESIGN.md) for the full technical design document.
 
 ## License
 
-Private use only. Not for redistribution.
+This project is licensed under the [MIT License](LICENSE).

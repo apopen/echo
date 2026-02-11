@@ -30,17 +30,67 @@ jobs:
       - name: Run tests
         run: swift test
 
-      - name: Package binary
+      - name: Create app bundle
         run: |
-          mkdir -p dist
-          cp .build/release/Echo dist/Echo
-          cd dist && tar czf Echo-${{ github.ref_name }}-macos-arm64.tar.gz Echo
-          cd .. && shasum -a 256 dist/Echo-${{ github.ref_name }}-macos-arm64.tar.gz > dist/checksums.txt
+          VERSION="${GITHUB_REF_NAME#v}"
+
+          # Create .app bundle structure
+          mkdir -p dist/Echo.app/Contents/MacOS
+          mkdir -p dist/Echo.app/Contents/Resources
+
+          # Copy the binary
+          cp .build/release/Echo dist/Echo.app/Contents/MacOS/Echo
+
+          # Write resolved Info.plist (replace Xcode variables with real values)
+          cat > dist/Echo.app/Contents/Info.plist << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleDevelopmentRegion</key>
+              <string>en</string>
+              <key>CFBundleExecutable</key>
+              <string>Echo</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.apopen.echo</string>
+              <key>CFBundleInfoDictionaryVersion</key>
+              <string>6.0</string>
+              <key>CFBundleName</key>
+              <string>Echo</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>CFBundleShortVersionString</key>
+              <string>VERSIONPLACEHOLDER</string>
+              <key>CFBundleVersion</key>
+              <string>VERSIONPLACEHOLDER</string>
+              <key>LSMinimumSystemVersion</key>
+              <string>14.0</string>
+              <key>LSUIElement</key>
+              <true/>
+              <key>CFBundleIconFile</key>
+              <string>Echo</string>
+              <key>NSMicrophoneUsageDescription</key>
+              <string>Echo needs microphone access to capture your voice for local speech-to-text transcription. Audio is never sent to any server.</string>
+          </dict>
+          </plist>
+          PLIST
+
+          # Copy app icon
+          cp Echo/Resources/Echo.icns dist/Echo.app/Contents/Resources/Echo.icns
+
+          # Replace version placeholder
+          sed -i '' "s/VERSIONPLACEHOLDER/${VERSION}/g" dist/Echo.app/Contents/Info.plist
+
+          # Package as zip (standard macOS app distribution format)
+          cd dist
+          ditto -c -k --keepParent Echo.app "Echo-${GITHUB_REF_NAME}-macos-arm64.zip"
+          cd ..
+          shasum -a 256 "dist/Echo-${GITHUB_REF_NAME}-macos-arm64.zip" > dist/checksums.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           files: |
-            dist/Echo-${{ github.ref_name }}-macos-arm64.tar.gz
+            dist/Echo-${{ github.ref_name }}-macos-arm64.zip
             dist/checksums.txt
