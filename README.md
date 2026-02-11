@@ -43,17 +43,26 @@
 
 ## Quick Start
 
-### Download
+### Install with Homebrew (recommended)
+
+```bash
+brew tap apopen/echo
+brew install --cask echo
+```
+
+That's it — no quarantine warnings, no extra steps. To update later: `brew upgrade --cask echo`
+
+### Or download manually
 
 1. Grab the latest **Echo.app** from the [Releases page](https://github.com/apopen/echo/releases/latest)
 2. Unzip and drag **Echo.app** to your Applications folder
-3. **Remove the quarantine flag** (required because the app is not notarized by Apple):
+3. Remove the quarantine flag and open:
    ```bash
    xattr -cr /Applications/Echo.app
    ```
 4. Launch Echo from Applications
 
-> **Why is this needed?** macOS Gatekeeper blocks apps downloaded from the internet that aren't signed with an Apple Developer certificate. The `xattr -cr` command removes the quarantine flag so macOS will let you open it. This is standard for open-source Mac apps distributed outside the App Store.
+> **Note:** The `xattr` step is needed because the app is not notarized by Apple. This is standard for open-source Mac apps distributed outside the App Store. The Homebrew install above handles this automatically.
 
 ### Or build from source
 
