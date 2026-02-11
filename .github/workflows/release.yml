@@ -39,9 +39,14 @@ jobs:
           # Create .app bundle structure
           mkdir -p dist/Echo.app/Contents/MacOS
           mkdir -p dist/Echo.app/Contents/Resources
+          mkdir -p dist/Echo.app/Contents/Frameworks
 
-          # Copy the binary
+          # Copy the binary and fix rpath for bundled frameworks
           cp .build/release/Echo dist/Echo.app/Contents/MacOS/Echo
+          install_name_tool -add_rpath @loader_path/../Frameworks dist/Echo.app/Contents/MacOS/Echo
+
+          # Copy Sparkle.framework
+          cp -R .build/release/Sparkle.framework dist/Echo.app/Contents/Frameworks/
 
           # Write resolved Info.plist (replace Xcode variables with real values)
           cat > dist/Echo.app/Contents/Info.plist << PLIST
