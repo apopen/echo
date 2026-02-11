@@ -1,12 +1,14 @@
 import AppKit
 import SwiftUI
 import Combine
+import Sparkle
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let appState = AppState()
     let windowManager = WindowManager()
     let floatingBar = FloatingBarWindow()
+    let updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
     private var statusItem: NSStatusItem?
     private var statusBarController: StatusBarController?
     private var cancellables = Set<AnyCancellable>()
@@ -69,7 +71,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func setupStatusBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         if let statusItem {
-            statusBarController = StatusBarController(statusItem: statusItem, appState: appState, delegate: self)
+            statusBarController = StatusBarController(statusItem: statusItem, appState: appState, delegate: self, updaterController: updaterController)
         }
     }
 

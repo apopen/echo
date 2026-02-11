@@ -11,12 +11,14 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/Justmalhar/WhisperCppKit.git", from: "0.1.1"),
+        .package(url: "https://github.com/sparkle-project/Sparkle.git", from: "2.6.0"),
     ],
     targets: [
         .executableTarget(
             name: "Echo",
             dependencies: [
                 .product(name: "WhisperCppKit", package: "WhisperCppKit"),
+                .product(name: "Sparkle", package: "Sparkle"),
             ],
             path: "Echo/Sources",
             resources: [

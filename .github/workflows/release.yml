@@ -31,6 +31,8 @@ jobs:
         run: swift test
 
       - name: Create app bundle
+        env:
+          SUPublicEDKey: ${{ secrets.SPARKLE_PUBLIC_ED_KEY }}
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
 
@@ -42,7 +44,7 @@ jobs:
           cp .build/release/Echo dist/Echo.app/Contents/MacOS/Echo
 
           # Write resolved Info.plist (replace Xcode variables with real values)
-          cat > dist/Echo.app/Contents/Info.plist << 'PLIST'
+          cat > dist/Echo.app/Contents/Info.plist << PLIST
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -60,9 +62,9 @@ jobs:
               <key>CFBundlePackageType</key>
               <string>APPL</string>
               <key>CFBundleShortVersionString</key>
-              <string>VERSIONPLACEHOLDER</string>
+              <string>${VERSION}</string>
               <key>CFBundleVersion</key>
-              <string>VERSIONPLACEHOLDER</string>
+              <string>${VERSION}</string>
               <key>LSMinimumSystemVersion</key>
               <string>14.0</string>
               <key>LSUIElement</key>
@@ -71,15 +73,16 @@ jobs:
               <string>Echo</string>
               <key>NSMicrophoneUsageDescription</key>
               <string>Echo needs microphone access to capture your voice for local speech-to-text transcription. Audio is never sent to any server.</string>
+              <key>SUFeedURL</key>
+              <string>https://apopen.github.io/echo/appcast.xml</string>
+              <key>SUPublicEDKey</key>
+              <string>${SUPublicEDKey}</string>
           </dict>
           </plist>
           PLIST
 
           # Copy app icon
           cp Echo/Resources/Echo.icns dist/Echo.app/Contents/Resources/Echo.icns
-
-          # Replace version placeholder
-          sed -i '' "s/VERSIONPLACEHOLDER/${VERSION}/g" dist/Echo.app/Contents/Info.plist
 
           # Ad-hoc code sign the binary
           codesign --force --deep -s - dist/Echo.app
@@ -89,6 +92,62 @@ jobs:
           ditto -c -k --keepParent Echo.app "Echo-${GITHUB_REF_NAME}-macos-arm64.zip"
           cd ..
           shasum -a 256 "dist/Echo-${GITHUB_REF_NAME}-macos-arm64.zip" > dist/checksums.txt
+
+      - name: Install Sparkle tools
+        run: |
+          SPARKLE_VERSION="2.6.4"
+          curl -sL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-${SPARKLE_VERSION}.tar.xz" -o /tmp/sparkle.tar.xz
+          mkdir -p /tmp/sparkle
+          tar -xf /tmp/sparkle.tar.xz -C /tmp/sparkle
+          echo "/tmp/sparkle/bin" >> "$GITHUB_PATH"
+
+      - name: Sign update with EdDSA
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          ZIP_PATH="dist/Echo-${GITHUB_REF_NAME}-macos-arm64.zip"
+          SIGNATURE=$(echo "$SPARKLE_PRIVATE_KEY" | /tmp/sparkle/bin/sign_update "$ZIP_PATH" --ed-key-file -)
+          echo "SPARKLE_SIGNATURE=${SIGNATURE}" >> "$GITHUB_ENV"
+          echo "ZIP_LENGTH=$(stat -f%z "$ZIP_PATH")" >> "$GITHUB_ENV"
+
+      - name: Generate appcast.xml
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          DOWNLOAD_URL="https://github.com/apopen/echo/releases/download/${GITHUB_REF_NAME}/Echo-${GITHUB_REF_NAME}-macos-arm64.zip"
+          cat > dist/appcast.xml << APPCAST
+          <?xml version="1.0" encoding="utf-8"?>
+          <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+            <channel>
+              <title>Echo Updates</title>
+              <link>https://apopen.github.io/echo/appcast.xml</link>
+              <item>
+                <title>Version ${VERSION}</title>
+                <sparkle:version>${VERSION}</sparkle:version>
+                <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
+                <pubDate>$(date -R)</pubDate>
+                <enclosure url="${DOWNLOAD_URL}"
+                           type="application/octet-stream"
+                           sparkle:edSignature="${SPARKLE_SIGNATURE}"
+                           length="${ZIP_LENGTH}" />
+              </item>
+            </channel>
+          </rss>
+          APPCAST
+
+      - name: Publish appcast to gh-pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin gh-pages:gh-pages || git checkout --orphan gh-pages
+          git checkout gh-pages
+          cp dist/appcast.xml appcast.xml
+          git add appcast.xml
+          git commit -m "Update appcast for ${GITHUB_REF_NAME}" || true
+          git push origin gh-pages
+          git checkout "${GITHUB_REF_NAME}"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

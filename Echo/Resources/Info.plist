@@ -26,5 +26,9 @@
     <string>Echo needs microphone access to capture your voice for local speech-to-text transcription. Audio is never sent to any server.</string>
     <key>NSMainStoryboardFile</key>
     <string></string>
+    <key>SUFeedURL</key>
+    <string>https://apopen.github.io/echo/appcast.xml</string>
+    <key>SUPublicEDKey</key>
+    <string>XdB7ZcjHVVIq0DHiHNNMys3JSuYAsoUDJSBjCF5G6X4=</string>
 </dict>
 </plist>

@@ -1,5 +1,6 @@
 import AppKit
 import Combine
+import Sparkle
 
 /// Manages the NSStatusItem (menu bar icon) and its menu.
 @MainActor
@@ -7,16 +8,18 @@ final class StatusBarController: NSObject {
     private let statusItem: NSStatusItem
     private let appState: AppState
     private weak var delegate: AppDelegate?
+    private let updaterController: SPUStandardUpdaterController
     private var cancellables = Set<AnyCancellable>()
 
     private var waveformTimer: Timer?
     private var wavePhase: CGFloat = 0
     private var displayLevel: CGFloat = 0
 
-    init(statusItem: NSStatusItem, appState: AppState, delegate: AppDelegate) {
+    init(statusItem: NSStatusItem, appState: AppState, delegate: AppDelegate, updaterController: SPUStandardUpdaterController) {
         self.statusItem = statusItem
         self.appState = appState
         self.delegate = delegate
+        self.updaterController = updaterController
         super.init()
         setupStatusItem()
     }
@@ -241,6 +244,11 @@ final class StatusBarController: NSObject {
         let settingsItem = NSMenuItem(title: "Settings...", action: #selector(openSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
+
+        // Check for Updates
+        let updateItem = NSMenuItem(title: "Check for Updates...", action: #selector(SPUStandardUpdaterController.checkForUpdates(_:)), keyEquivalent: "")
+        updateItem.target = updaterController
+        menu.addItem(updateItem)
 
         menu.addItem(NSMenuItem.separator())
 
