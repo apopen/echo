@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import Combine
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -8,11 +9,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let floatingBar = FloatingBarWindow()
     private var statusItem: NSStatusItem?
     private var statusBarController: StatusBarController?
+    private var cancellables = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         setupStatusBar()
         appState.initialize()
         floatingBar.show(appState: appState)
+
+        // Hide floating bar if waveform is shown in menu bar
+        if appState.settingsStore.showWaveformInMenuBar {
+            floatingBar.hide()
+        }
+
+        // Observe setting changes
+        appState.settingsStore.$showWaveformInMenuBar
+            .dropFirst()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] showInMenuBar in
+                if showInMenuBar {
+                    self?.floatingBar.hide()
+                } else {
+                    self?.floatingBar.unhide()
+                }
+            }
+            .store(in: &cancellables)
 
         // Show onboarding on first launch
         if !appState.hasCompletedOnboarding {

@@ -60,4 +60,12 @@ final class FloatingBarWindow {
 
         window.setFrameOrigin(NSPoint(x: barX, y: barY))
     }
+
+    func hide() {
+        window?.orderOut(nil)
+    }
+
+    func unhide() {
+        window?.orderFrontRegardless()
+    }
 }

@@ -19,6 +19,7 @@ final class SettingsStore: ObservableObject {
         static let hasCompletedOnboarding = "hasCompletedOnboarding"
         static let appRules = "appRules"
         static let insertionMode = "insertionMode"
+        static let showWaveformInMenuBar = "showWaveformInMenuBar"
     }
 
     // MARK: - Properties
@@ -33,6 +34,7 @@ final class SettingsStore: ObservableObject {
     @Published var maxRecordingDuration: TimeInterval = 120
     @Published var hasCompletedOnboarding: Bool = false
     @Published var appRules: [AppRule] = []
+    @Published var showWaveformInMenuBar: Bool = false
 
     // MARK: - Load/Save
 
@@ -72,6 +74,8 @@ final class SettingsStore: ObservableObject {
             appRules = rules
         }
 
+        showWaveformInMenuBar = defaults.bool(forKey: Keys.showWaveformInMenuBar)
+
         Self.logger.info("Settings loaded")
     }
 
@@ -91,6 +95,7 @@ final class SettingsStore: ObservableObject {
         if let data = try? JSONEncoder().encode(appRules) {
             defaults.set(data, forKey: Keys.appRules)
         }
+        defaults.set(showWaveformInMenuBar, forKey: Keys.showWaveformInMenuBar)
 
         Self.logger.info("Settings saved")
     }

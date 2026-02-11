@@ -36,7 +36,7 @@ struct SettingsView: View {
                 }
                 .environmentObject(appState)
         }
-        .frame(width: 500, height: 400)
+        .frame(width: 500, height: 450)
     }
 }
 
@@ -111,7 +111,20 @@ struct GeneralSettingsView: View {
                 }
             }
 
-Section("System") {
+            Section("Appearance") {
+                Toggle("Show waveform in menu bar", isOn: Binding(
+                    get: { appState.settingsStore.showWaveformInMenuBar },
+                    set: {
+                        appState.settingsStore.showWaveformInMenuBar = $0
+                        appState.settingsStore.save()
+                    }
+                ))
+                Text("Hides the floating bar and shows audio activity in the menu bar icon instead")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Section("System") {
                 Toggle("Launch at Login", isOn: Binding(
                     get: { appState.settingsStore.launchAtLogin },
                     set: {
